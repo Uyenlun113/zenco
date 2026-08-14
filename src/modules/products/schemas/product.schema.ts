@@ -41,6 +41,27 @@ export class Product {
   @Prop({ default: false })
   isFeatured: boolean;
 
+  @Prop({ default: false })
+  isNewProduct: boolean;
+
+  @Prop({ default: 0 })
+  listPrice: number;
+
+  @Prop({ default: '' })
+  shortDescription: string;
+
+  @Prop({ type: [{ url: String, alt: String, title: String }], default: [] })
+  imageDetails: { url: string; alt?: string; title?: string }[];
+
+  @Prop({ type: [Object], default: [] })
+  reviews: any[];
+
+  @Prop({ type: [Object], default: [] })
+  comments: any[];
+
+  @Prop({ type: [Object], default: [] })
+  updateHistory: any[];
+
   @Prop({ default: '' })
   videoUrl: string;
 
@@ -53,6 +74,9 @@ export class Product {
 
   @Prop({ type: [String], default: [] })
   metaKeywords: string[];
+
+  @Prop({ type: [String], default: [] })
+  tags: string[];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

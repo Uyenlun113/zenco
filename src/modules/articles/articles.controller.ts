@@ -7,9 +7,16 @@ export class ArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}
 
   @Get()
-  async findAll(@Query('admin') admin?: string) {
+  async findAll(
+    @Query('admin') admin?: string,
+    @Query('search') search?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
     const publishedOnly = admin === 'true' ? false : true;
-    return this.articlesService.findAll(publishedOnly);
+    const pageNum = page ? parseInt(page, 10) : undefined;
+    const limitNum = limit ? parseInt(limit, 10) : undefined;
+    return this.articlesService.findAll(publishedOnly, search, pageNum, limitNum);
   }
 
   @Get('slug/:slug')

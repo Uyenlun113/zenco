@@ -10,10 +10,13 @@ import { InquiriesModule } from './modules/inquiries/inquiries.module';
 import { SeedModule } from './modules/seed/seed.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UploadModule } from './modules/upload/upload.module';
+import { SettingsModule } from './modules/settings/settings.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: ['.env', '../.env'],
       isGlobal: true,
     }),
     MongooseModule.forRootAsync({
@@ -33,6 +36,8 @@ import { UploadModule } from './modules/upload/upload.module';
     SeedModule,
     AuthModule,
     UploadModule,
+    SettingsModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

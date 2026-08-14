@@ -7,8 +7,37 @@ import { Inquiry, InquiryDocument } from './schemas/inquiry.schema';
 export class InquiriesService {
   constructor(@InjectModel(Inquiry.name) private inquiryModel: Model<InquiryDocument>) {}
 
-  async findAll(): Promise<Inquiry[]> {
-    return this.inquiryModel.find().sort({ createdAt: -1 }).exec();
+  async findAll(
+    search?: string,
+    status?: string,
+    page?: number,
+    limit?: number,
+  ) {
+    const filter: any = {};
+    if (status) filter.status = status;
+    if (search) {
+      filter['$or'] = [
+        { customerName: new RegExp(search, 'i') },
+        { phone: new RegExp(search, 'i') },
+        { email: new RegExp(search, 'i') },
+        { productName: new RegExp(search, 'i') },
+        { message: new RegExp(search, 'i') },
+      ];
+    }
+
+    if (page && limit) {
+      const pageNum = Number(page) || 1;
+      const limitNum = Number(limit) || 10;
+      const skip = (pageNum - 1) * limitNum;
+      const [items, total] = await Promise.all([
+        this.inquiryModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limitNum).exec(),
+        this.inquiryModel.countDocuments(filter).exec(),
+      ]);
+      const totalPages = Math.ceil(total / limitNum) || 1;
+      return { items, total, page: pageNum, totalPages, limit: limitNum };
+    }
+
+    return this.inquiryModel.find(filter).sort({ createdAt: -1 }).exec();
   }
 
   async create(data: Partial<Inquiry>): Promise<Inquiry> {
@@ -18,13 +47,13 @@ export class InquiriesService {
 
   async updateStatus(id: string, status: string): Promise<Inquiry> {
     const updated = await this.inquiryModel.findByIdAndUpdate(id, { status }, { new: true }).exec();
-    if (!updated) throw new NotFoundException('Không tìm th?y yêu c?u báo giá');
+    if (!updated) throw new NotFoundException('KhÃ´ng tÃ¬m tháº¥y yÃªu cáº§u bÃ¡o giÃ¡');
     return updated;
   }
 
   async remove(id: string): Promise<{ success: boolean }> {
     const res = await this.inquiryModel.findByIdAndDelete(id).exec();
-    if (!res) throw new NotFoundException('Không tìm th?y yêu c?u');
+    if (!res) throw new NotFoundException('KhÃ´ng tÃ¬m tháº¥y yÃªu cáº§u');
     return { success: true };
   }
 }

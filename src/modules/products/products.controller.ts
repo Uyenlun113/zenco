@@ -11,9 +11,18 @@ export class ProductsController {
     @Query('category') category?: string,
     @Query('featured') featured?: string,
     @Query('search') search?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
     const isFeatured = featured === 'true' ? true : featured === 'false' ? false : undefined;
-    return this.productsService.findAll(category, isFeatured, search);
+    const pageNum = page ? parseInt(page, 10) : undefined;
+    const limitNum = limit ? parseInt(limit, 10) : undefined;
+    return this.productsService.findAll(category, isFeatured, search, pageNum, limitNum);
+  }
+
+  @Get('comments/all')
+  async getAllComments() {
+    return this.productsService.getAllComments();
   }
 
   @Get('slug/:slug')
@@ -34,6 +43,33 @@ export class ProductsController {
   @Put(':id')
   async update(@Param('id') id: string, @Body() body: Partial<Product>) {
     return this.productsService.update(id, body);
+  }
+
+  @Post(':slug/reviews')
+  async addReview(@Param('slug') slug: string, @Body() reviewData: any) {
+    return this.productsService.addReview(slug, reviewData);
+  }
+
+  @Post(':slug/comments')
+  async addComment(@Param('slug') slug: string, @Body() commentData: any) {
+    return this.productsService.addComment(slug, commentData);
+  }
+
+  @Post(':slug/comments/:commentId/reply')
+  async replyComment(
+    @Param('slug') slug: string,
+    @Param('commentId') commentId: string,
+    @Body() replyData: any,
+  ) {
+    return this.productsService.replyComment(slug, commentId, replyData);
+  }
+
+  @Delete(':slug/comments/:commentId')
+  async deleteComment(
+    @Param('slug') slug: string,
+    @Param('commentId') commentId: string,
+  ) {
+    return this.productsService.deleteComment(slug, commentId);
   }
 
   @Delete(':id')
