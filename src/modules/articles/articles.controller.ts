@@ -38,4 +38,31 @@ export class ArticlesController {
   async remove(@Param('id') id: string) {
     return this.articlesService.remove(id);
   }
+
+  @Get('comments/all')
+  async getAllComments() {
+    return this.articlesService.getAllComments();
+  }
+
+  @Post(':slug/comments')
+  async addComment(@Param('slug') slug: string, @Body() commentData: any) {
+    return this.articlesService.addComment(slug, commentData);
+  }
+
+  @Post(':slug/comments/:commentId/reply')
+  async replyComment(
+    @Param('slug') slug: string,
+    @Param('commentId') commentId: string,
+    @Body() replyData: any,
+  ) {
+    return this.articlesService.replyComment(slug, commentId, replyData);
+  }
+
+  @Delete(':slug/comments/:commentId')
+  async deleteComment(
+    @Param('slug') slug: string,
+    @Param('commentId') commentId: string,
+  ) {
+    return this.articlesService.deleteComment(slug, commentId);
+  }
 }

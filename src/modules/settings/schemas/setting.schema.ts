@@ -17,7 +17,7 @@ export class Setting {
   key: string;
 
   // Branding & Contact
-  @Prop({ default: 'Công Ty TNHH Máy & Thiết Bị Hồng Hạnh' })
+  @Prop({ default: 'Công Ty TNHH Máy & Thiết Bị Tuấn Anh' })
   companyName: string;
 
   @Prop({ default: '0988.123.456' })
@@ -65,7 +65,7 @@ export class Setting {
   googleMapsUrl: string;
 
   // Global SEO
-  @Prop({ default: 'Máy Móc Công Nghiệp Hồng Hạnh - Giá Tốt Chính Hãng' })
+  @Prop({ default: 'Máy Móc Công Nghiệp Tuấn Anh - Giá Tốt Chính Hãng' })
   metaTitle: string;
 
   @Prop({ default: 'Đơn vị nhập khẩu và phân phối máy móc đóng gói, máy chế biến nông sản, máy móc công nghiệp chất lượng cao.' })
@@ -81,7 +81,7 @@ export class Setting {
   @Prop({ default: '8:00 - 17:30 (Thứ 2 - Thứ 7)' })
   workingHours: string;
 
-  @Prop({ default: '© 2026 Hong Hanh Machines. Tất cả quyền được bảo lưu.' })
+  @Prop({ default: '© 2026 Tuấn Anh Machines. Tất cả quyền được bảo lưu.' })
   copyrightText: string;
 }
 

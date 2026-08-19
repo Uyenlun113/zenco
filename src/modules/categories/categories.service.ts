@@ -1,4 +1,4 @@
-﻿import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Category, CategoryDocument } from './schemas/category.schema';
@@ -25,14 +25,14 @@ export class CategoriesService {
       const limitNum = Number(limit) || 10;
       const skip = (pageNum - 1) * limitNum;
       const [items, total] = await Promise.all([
-        this.categoryModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limitNum).exec(),
+        this.categoryModel.find(filter).sort({ createdAt: 1 }).skip(skip).limit(limitNum).exec(),
         this.categoryModel.countDocuments(filter).exec(),
       ]);
       const totalPages = Math.ceil(total / limitNum) || 1;
       return { items, total, page: pageNum, totalPages, limit: limitNum };
     }
 
-    return this.categoryModel.find(filter).sort({ createdAt: -1 }).exec();
+    return this.categoryModel.find(filter).sort({ createdAt: 1 }).exec();
   }
 
   async create(data: Partial<Category>): Promise<Category> {

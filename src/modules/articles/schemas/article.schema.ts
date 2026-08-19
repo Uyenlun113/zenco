@@ -38,6 +38,9 @@ export class Article {
 
   @Prop({ type: [String], default: [] })
   metaKeywords: string[];
+
+  @Prop({ type: [Object], default: [] })
+  comments: any[];
 }
 
 export const ArticleSchema = SchemaFactory.createForClass(Article);

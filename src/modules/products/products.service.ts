@@ -2,10 +2,33 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Product, ProductDocument } from './schemas/product.schema';
+import { Category, CategoryDocument } from '../categories/schemas/category.schema';
 
 @Injectable()
 export class ProductsService {
-  constructor(@InjectModel(Product.name) private productModel: Model<ProductDocument>) { }
+  constructor(
+    @InjectModel(Product.name) private productModel: Model<ProductDocument>,
+    @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
+  ) { }
+
+  async findByCategories() {
+    const categories = await this.categoryModel.find().sort({ createdAt: 1 }).exec();
+    const result: any[] = [];
+    for (const cat of categories) {
+      const products = await this.productModel
+        .find({ category: cat.slug })
+        .sort({ createdAt: 1 })
+        .limit(6)
+        .exec();
+      if (products.length > 0) {
+        result.push({
+          ...cat.toObject(),
+          products,
+        });
+      }
+    }
+    return result;
+  }
 
   async findAll(
     category?: string,
@@ -13,10 +36,14 @@ export class ProductsService {
     search?: string,
     page?: number,
     limit?: number,
+    minPrice?: number,
+    maxPrice?: number,
+    sortBy?: string,
   ) {
     const filter: any = {};
-    if (category) filter.category = category;
+    if (category && category !== 'ALL') filter.category = category;
     if (featured !== undefined) filter.isFeatured = featured;
+    
     if (search) {
       filter['$or'] = [
         { name: new RegExp(search, 'i') },
@@ -24,20 +51,51 @@ export class ProductsService {
       ];
     }
 
+    // Price range filtering (using either discountPrice or price)
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      const priceFilterObj: any = {};
+      if (minPrice !== undefined) priceFilterObj.$gte = minPrice;
+      if (maxPrice !== undefined) priceFilterObj.$lte = maxPrice;
+
+      // Match products where effective price falls in range
+      filter.$and = [
+        {
+          $or: [
+            { discountPrice: { $gt: 0, ...priceFilterObj } },
+            { 
+              $or: [
+                { discountPrice: { $exists: false } }, 
+                { discountPrice: 0 }, 
+                { discountPrice: null }
+              ], 
+              price: priceFilterObj 
+            }
+          ]
+        }
+      ];
+    }
+
+    // Sorting options
+    let sortObj: any = { createdAt: -1 };
+    if (sortBy === 'PRICE_ASC') {
+      sortObj = { price: 1 };
+    } else if (sortBy === 'PRICE_DESC') {
+      sortObj = { price: -1 };
+    }
+
     if (page && limit) {
       const pageNum = Number(page) || 1;
       const limitNum = Number(limit) || 10;
       const skip = (pageNum - 1) * limitNum;
       const [items, total] = await Promise.all([
-        this.productModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limitNum).exec(),
+        this.productModel.find(filter).sort(sortObj).skip(skip).limit(limitNum).exec(),
         this.productModel.countDocuments(filter).exec(),
       ]);
       const totalPages = Math.ceil(total / limitNum) || 1;
       return { items, total, page: pageNum, totalPages, limit: limitNum };
     }
 
-  // Return un-paginated array if page/limit not provided (backward compatibility)
-    return this.productModel.find(filter).sort({ createdAt: -1 }).exec();
+    return this.productModel.find(filter).sort(sortObj).exec();
   }
 
   async getAllComments() {

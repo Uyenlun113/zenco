@@ -13,11 +13,21 @@ export class ProductsController {
     @Query('search') search?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('minPrice') minPrice?: string,
+    @Query('maxPrice') maxPrice?: string,
+    @Query('sortBy') sortBy?: string,
   ) {
     const isFeatured = featured === 'true' ? true : featured === 'false' ? false : undefined;
     const pageNum = page ? parseInt(page, 10) : undefined;
     const limitNum = limit ? parseInt(limit, 10) : undefined;
-    return this.productsService.findAll(category, isFeatured, search, pageNum, limitNum);
+    const minPriceNum = minPrice ? parseInt(minPrice, 10) : undefined;
+    const maxPriceNum = maxPrice ? parseInt(maxPrice, 10) : undefined;
+    return this.productsService.findAll(category, isFeatured, search, pageNum, limitNum, minPriceNum, maxPriceNum, sortBy);
+  }
+
+  @Get('by-categories')
+  async findByCategories() {
+    return this.productsService.findByCategories();
   }
 
   @Get('comments/all')

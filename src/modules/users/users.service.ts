@@ -9,7 +9,7 @@ export class UsersService implements OnModuleInit {
 
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-  ) {}
+  ) { }
 
   async onModuleInit() {
     await this.seedAdminUser();
@@ -23,7 +23,7 @@ export class UsersService implements OnModuleInit {
         const defaultAdmin = await this.userModel.create({
           username: 'admin',
           passwordHash: 'admin123', // In production use bcrypt hash
-          name: 'Quản Trị Viên Hồng Hạnh',
+          name: 'Quản Trị Viên Tuấn Anh',
           email: 'admin@honghanhmachines.com',
           role: 'SUPER_ADMIN',
           isActive: true,

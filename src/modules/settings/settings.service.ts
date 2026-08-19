@@ -7,7 +7,7 @@ import { Setting, SettingDocument } from './schemas/setting.schema';
 export class SettingsService {
   constructor(
     @InjectModel(Setting.name) private settingModel: Model<SettingDocument>,
-  ) {}
+  ) { }
 
   async getSettings(): Promise<Setting> {
     let settings = await this.settingModel.findOne({
@@ -16,7 +16,7 @@ export class SettingsService {
     if (!settings) {
       settings = await this.settingModel.create({
         key: 'honghanh_global_settings',
-        companyName: 'Công Ty TNHH Máy & Thiết Bị Hồng Hạnh',
+        companyName: 'Công Ty TNHH Máy & Thiết Bị Tuấn Anh',
         hotline: '0988.123.456',
         zalo: '0988.123.456',
         email: 'contact@honghanhmachines.com',

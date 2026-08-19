@@ -11,7 +11,7 @@ export class User {
   @Prop({ required: true })
   passwordHash: string;
 
-  @Prop({ required: true, default: 'Admin Hong Hanh' })
+  @Prop({ required: true, default: 'Admin Tuấn Anh' })
   name: string;
 
   @Prop({ default: 'admin@honghanhmachines.com' })
