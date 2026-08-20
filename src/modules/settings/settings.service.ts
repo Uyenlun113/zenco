@@ -16,12 +16,17 @@ export class SettingsService {
     if (!settings) {
       settings = await this.settingModel.create({
         key: 'honghanh_global_settings',
-        companyName: 'Công Ty TNHH Máy & Thiết Bị Tuấn Anh',
-        hotline: '0988.123.456',
-        zalo: '0988.123.456',
-        email: 'contact@honghanhmachines.com',
+        companyName: 'Tuấn Anh Machines - Máy Móc Nông Nghiệp & Công Nghiệp',
+        hotline: '0868.214.886',
+        zalo: '0868.214.886',
+        email: 'contact@tuananhmachine.vn',
         address: 'Cụm CN Từ Liêm, P. Phương Canh, Q. Nam Từ Liêm, Hà Nội',
+        addresses: ['Cụm CN Từ Liêm, P. Phương Canh, Q. Nam Từ Liêm, Hà Nội'],
         taxCode: '0101234567',
+        workingHours: 'Thứ 2 - Chủ Nhật (7:30 - 20:00)',
+        bankName: 'VIETINBANK',
+        bankAccountNo: '108869294069',
+        bankAccountHolder: 'NGUYEN TUAN ANH',
         heroSlogan: 'Chuyên Cung Cấp Máy Móc Công Nghiệp & Đóng Gói Tự Động Hàng Đầu',
         banners: [
           {

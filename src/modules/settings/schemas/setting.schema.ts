@@ -17,20 +17,23 @@ export class Setting {
   key: string;
 
   // Branding & Contact
-  @Prop({ default: 'Công Ty TNHH Máy & Thiết Bị Tuấn Anh' })
+  @Prop({ default: 'Tuấn Anh Machines - Máy Móc Nông Nghiệp & Công Nghiệp' })
   companyName: string;
 
-  @Prop({ default: '0988.123.456' })
+  @Prop({ default: '0868.214.886' })
   hotline: string;
 
-  @Prop({ default: '0988.123.456' })
+  @Prop({ default: '0868.214.886' })
   zalo: string;
 
-  @Prop({ default: 'contact@honghanhmachines.com' })
+  @Prop({ default: 'contact@tuananhmachine.vn' })
   email: string;
 
   @Prop({ default: 'Cụm CN Từ Liêm, P. Phương Canh, Q. Nam Từ Liêm, Hà Nội' })
   address: string;
+
+  @Prop({ type: [String], default: ['Cụm CN Từ Liêm, P. Phương Canh, Q. Nam Từ Liêm, Hà Nội'] })
+  addresses: string[];
 
   @Prop({ default: '0101234567' })
   taxCode: string;
@@ -40,6 +43,16 @@ export class Setting {
 
   @Prop({ default: '/icon.svg' })
   faviconUrl: string;
+
+  // Bank Info
+  @Prop({ default: 'VIETINBANK' })
+  bankName: string;
+
+  @Prop({ default: '108869294069' })
+  bankAccountNo: string;
+
+  @Prop({ default: 'NGUYEN TUAN ANH' })
+  bankAccountHolder: string;
 
   // Banners & Hero Section
   @Prop({ type: Array, default: [] })
@@ -55,7 +68,7 @@ export class Setting {
   @Prop({ default: 'https://facebook.com' })
   facebookUrl: string;
 
-  @Prop({ default: 'https://zalo.me/0988123456' })
+  @Prop({ default: 'https://zalo.me/0868214886' })
   zaloUrl: string;
 
   @Prop({ default: 'https://youtube.com' })
@@ -78,7 +91,7 @@ export class Setting {
   googleAnalyticsId: string;
 
   // Footer & Policy
-  @Prop({ default: '8:00 - 17:30 (Thứ 2 - Thứ 7)' })
+  @Prop({ default: 'Thứ 2 - Chủ Nhật (7:30 - 20:00)' })
   workingHours: string;
 
   @Prop({ default: '© 2026 Tuấn Anh Machines. Tất cả quyền được bảo lưu.' })

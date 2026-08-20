@@ -40,15 +40,45 @@ export class ProductsService {
     maxPrice?: number,
     sortBy?: string,
   ) {
-    const filter: any = {};
-    if (category && category !== 'ALL') filter.category = category;
-    if (featured !== undefined) filter.isFeatured = featured;
-    
+    const filterConditions: any[] = [];
+
+    if (category && category !== 'ALL') {
+      const isObjectId = category.match(/^[0-9a-fA-F]{24}$/);
+      const catDoc = await this.categoryModel.findOne(
+        isObjectId ? { $or: [{ _id: category }, { slug: category }] } : { slug: category }
+      ).exec();
+
+      if (catDoc) {
+        filterConditions.push({
+          $or: [
+            { category: catDoc.slug },
+            { category: catDoc._id.toString() },
+            { category: category },
+            { categoryId: catDoc._id.toString() },
+            { categoryId: catDoc.slug },
+          ],
+        });
+      } else {
+        filterConditions.push({
+          $or: [
+            { category: category },
+            { categoryId: category },
+          ],
+        });
+      }
+    }
+
+    if (featured !== undefined) {
+      filterConditions.push({ isFeatured: featured });
+    }
+
     if (search) {
-      filter['$or'] = [
-        { name: new RegExp(search, 'i') },
-        { description: new RegExp(search, 'i') },
-      ];
+      filterConditions.push({
+        $or: [
+          { name: new RegExp(search, 'i') },
+          { description: new RegExp(search, 'i') },
+        ],
+      });
     }
 
     // Price range filtering (using either discountPrice or price)
@@ -57,23 +87,22 @@ export class ProductsService {
       if (minPrice !== undefined) priceFilterObj.$gte = minPrice;
       if (maxPrice !== undefined) priceFilterObj.$lte = maxPrice;
 
-      // Match products where effective price falls in range
-      filter.$and = [
-        {
-          $or: [
-            { discountPrice: { $gt: 0, ...priceFilterObj } },
-            { 
-              $or: [
-                { discountPrice: { $exists: false } }, 
-                { discountPrice: 0 }, 
-                { discountPrice: null }
-              ], 
-              price: priceFilterObj 
-            }
-          ]
-        }
-      ];
+      filterConditions.push({
+        $or: [
+          { discountPrice: { $gt: 0, ...priceFilterObj } },
+          {
+            $or: [
+              { discountPrice: { $exists: false } },
+              { discountPrice: 0 },
+              { discountPrice: null },
+            ],
+            price: priceFilterObj,
+          },
+        ],
+      });
     }
+
+    const filter = filterConditions.length > 0 ? { $and: filterConditions } : {};
 
     // Sorting options
     let sortObj: any = { createdAt: -1 };
