@@ -1,8 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import {
+  Category,
+  CategoryDocument,
+} from '../categories/schemas/category.schema';
 import { Product, ProductDocument } from './schemas/product.schema';
-import { Category, CategoryDocument } from '../categories/schemas/category.schema';
 
 @Injectable()
 export class ProductsService {
@@ -12,7 +15,10 @@ export class ProductsService {
   ) { }
 
   async findByCategories() {
-    const categories = await this.categoryModel.find().sort({ createdAt: 1 }).exec();
+    const categories = await this.categoryModel
+      .find()
+      .sort({ createdAt: 1 })
+      .exec();
     const result: any[] = [];
     for (const cat of categories) {
       const products = await this.productModel
@@ -33,6 +39,7 @@ export class ProductsService {
   async findAll(
     category?: string,
     featured?: boolean,
+    isNewProduct?: boolean,
     search?: string,
     page?: number,
     limit?: number,
@@ -44,9 +51,13 @@ export class ProductsService {
 
     if (category && category !== 'ALL') {
       const isObjectId = category.match(/^[0-9a-fA-F]{24}$/);
-      const catDoc = await this.categoryModel.findOne(
-        isObjectId ? { $or: [{ _id: category }, { slug: category }] } : { slug: category }
-      ).exec();
+      const catDoc = await this.categoryModel
+        .findOne(
+          isObjectId
+            ? { $or: [{ _id: category }, { slug: category }] }
+            : { slug: category },
+        )
+        .exec();
 
       if (catDoc) {
         filterConditions.push({
@@ -60,16 +71,17 @@ export class ProductsService {
         });
       } else {
         filterConditions.push({
-          $or: [
-            { category: category },
-            { categoryId: category },
-          ],
+          $or: [{ category: category }, { categoryId: category }],
         });
       }
     }
 
     if (featured !== undefined) {
       filterConditions.push({ isFeatured: featured });
+    }
+
+    if (isNewProduct !== undefined) {
+      filterConditions.push({ isNewProduct: isNewProduct });
     }
 
     if (search) {
@@ -102,7 +114,8 @@ export class ProductsService {
       });
     }
 
-    const filter = filterConditions.length > 0 ? { $and: filterConditions } : {};
+    const filter =
+      filterConditions.length > 0 ? { $and: filterConditions } : {};
 
     // Sorting options
     let sortObj: any = { createdAt: -1 };
@@ -117,7 +130,12 @@ export class ProductsService {
       const limitNum = Number(limit) || 10;
       const skip = (pageNum - 1) * limitNum;
       const [items, total] = await Promise.all([
-        this.productModel.find(filter).sort(sortObj).skip(skip).limit(limitNum).exec(),
+        this.productModel
+          .find(filter)
+          .sort(sortObj)
+          .skip(skip)
+          .limit(limitNum)
+          .exec(),
         this.productModel.countDocuments(filter).exec(),
       ]);
       const totalPages = Math.ceil(total / limitNum) || 1;
@@ -129,7 +147,10 @@ export class ProductsService {
 
   async getAllComments() {
     const products = await this.productModel
-      .find({ 'comments.0': { $exists: true } }, { name: 1, slug: 1, images: 1, comments: 1 })
+      .find(
+        { 'comments.0': { $exists: true } },
+        { name: 1, slug: 1, images: 1, comments: 1 },
+      )
       .sort({ updatedAt: -1 })
       .exec();
 
@@ -192,9 +213,14 @@ export class ProductsService {
       data.category = (data as any).categoryId;
     }
     const isObjectId = idOrSlug.match(/^[0-9a-fA-F]{24}$/);
-    const filter = isObjectId ? { $or: [{ _id: idOrSlug }, { slug: idOrSlug }] } : { slug: idOrSlug };
-    const updated = await this.productModel.findOneAndUpdate(filter, data, { new: true }).exec();
-    if (!updated) throw new NotFoundException('Không tìm thấy sản phẩm để cập nhật');
+    const filter = isObjectId
+      ? { $or: [{ _id: idOrSlug }, { slug: idOrSlug }] }
+      : { slug: idOrSlug };
+    const updated = await this.productModel
+      .findOneAndUpdate(filter, data, { new: true })
+      .exec();
+    if (!updated)
+      throw new NotFoundException('Không tìm thấy sản phẩm để cập nhật');
     return updated;
   }
 
@@ -206,7 +232,9 @@ export class ProductsService {
 
   async addReview(slugOrId: string, reviewData: any) {
     const isObjectId = slugOrId.match(/^[0-9a-fA-F]{24}$/);
-    const filter = isObjectId ? { $or: [{ _id: slugOrId }, { slug: slugOrId }] } : { slug: slugOrId };
+    const filter = isObjectId
+      ? { $or: [{ _id: slugOrId }, { slug: slugOrId }] }
+      : { slug: slugOrId };
 
     const product = await this.productModel.findOne(filter).exec();
     if (!product) throw new NotFoundException('Không tìm thấy sản phẩm');
@@ -218,7 +246,9 @@ export class ProductsService {
       rating: Number(reviewData.rating) || 5,
       comment: reviewData.comment || reviewData.content || '',
       date: reviewData.date || new Date().toLocaleDateString('vi-VN'),
-      avatar: reviewData.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+      avatar:
+        reviewData.avatar ||
+        'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
       images: Array.isArray(reviewData.images) ? reviewData.images : [],
       verified: true,
       createdAt: new Date().toISOString(),
@@ -242,7 +272,9 @@ export class ProductsService {
 
   async addComment(slugOrId: string, commentData: any) {
     const isObjectId = slugOrId.match(/^[0-9a-fA-F]{24}$/);
-    const filter = isObjectId ? { $or: [{ _id: slugOrId }, { slug: slugOrId }] } : { slug: slugOrId };
+    const filter = isObjectId
+      ? { $or: [{ _id: slugOrId }, { slug: slugOrId }] }
+      : { slug: slugOrId };
 
     const product = await this.productModel.findOne(filter).exec();
     if (!product) throw new NotFoundException('Không tìm thấy sản phẩm');
@@ -275,7 +307,9 @@ export class ProductsService {
 
   async replyComment(slugOrId: string, commentId: string, replyData: any) {
     const isObjectId = slugOrId.match(/^[0-9a-fA-F]{24}$/);
-    const filter = isObjectId ? { $or: [{ _id: slugOrId }, { slug: slugOrId }] } : { slug: slugOrId };
+    const filter = isObjectId
+      ? { $or: [{ _id: slugOrId }, { slug: slugOrId }] }
+      : { slug: slugOrId };
 
     const product = await this.productModel.findOne(filter).exec();
     if (!product) throw new NotFoundException('Không tìm thấy sản phẩm');
@@ -285,7 +319,9 @@ export class ProductsService {
     }
 
     const commentIndex = product.comments.findIndex(
-      (c: any) => String(c._id) === String(commentId) || String(c.id) === String(commentId)
+      (c: any) =>
+        String(c._id) === String(commentId) ||
+        String(c.id) === String(commentId),
     );
 
     if (commentIndex === -1) {
@@ -312,19 +348,27 @@ export class ProductsService {
 
   async deleteComment(slugOrId: string, commentId: string) {
     const isObjectId = slugOrId.match(/^[0-9a-fA-F]{24}$/);
-    const filter = isObjectId ? { $or: [{ _id: slugOrId }, { slug: slugOrId }] } : { slug: slugOrId };
+    const filter = isObjectId
+      ? { $or: [{ _id: slugOrId }, { slug: slugOrId }] }
+      : { slug: slugOrId };
 
     const product = await this.productModel.findOne(filter).exec();
     if (!product) throw new NotFoundException('Không tìm thấy sản phẩm');
 
     if (Array.isArray(product.comments)) {
       product.comments = product.comments.filter(
-        (c: any) => String(c._id) !== String(commentId) && String(c.id) !== String(commentId)
+        (c: any) =>
+          String(c._id) !== String(commentId) &&
+          String(c.id) !== String(commentId),
       );
       product.markModified('comments');
       await product.save();
     }
 
-    return { success: true, message: 'Đã xóa câu hỏi', comments: product.comments };
+    return {
+      success: true,
+      message: 'Đã xóa câu hỏi',
+      comments: product.comments,
+    };
   }
 }

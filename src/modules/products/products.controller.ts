@@ -4,12 +4,13 @@ import { Product } from './schemas/product.schema';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(private readonly productsService: ProductsService) { }
 
   @Get()
   async findAll(
     @Query('category') category?: string,
     @Query('featured') featured?: string,
+    @Query('isNew') isNew?: string,
     @Query('search') search?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -18,11 +19,12 @@ export class ProductsController {
     @Query('sortBy') sortBy?: string,
   ) {
     const isFeatured = featured === 'true' ? true : featured === 'false' ? false : undefined;
+    const isNewProduct = isNew === 'true' ? true : isNew === 'false' ? false : undefined;
     const pageNum = page ? parseInt(page, 10) : undefined;
     const limitNum = limit ? parseInt(limit, 10) : undefined;
     const minPriceNum = minPrice ? parseInt(minPrice, 10) : undefined;
     const maxPriceNum = maxPrice ? parseInt(maxPrice, 10) : undefined;
-    return this.productsService.findAll(category, isFeatured, search, pageNum, limitNum, minPriceNum, maxPriceNum, sortBy);
+    return this.productsService.findAll(category, isFeatured, isNewProduct, search, pageNum, limitNum, minPriceNum, maxPriceNum, sortBy);
   }
 
   @Get('by-categories')
